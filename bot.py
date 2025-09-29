@@ -149,12 +149,12 @@ async def setup_raid_req(
     """Setup the raid request system"""
     # Check if user has admin permissions
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ You need administrator permissions to use this command.", ephemeral=True)
+        await interaction.response.send_message("You need administrator permissions to use this command.", ephemeral=True)
         return
     
     # Validate inputs
     if cooldown_minutes < 1:
-        await interaction.response.send_message("❌ Cooldown must be at least 1 minute.", ephemeral=True)
+        await interaction.response.send_message("Cooldown must be at least 1 minute.", ephemeral=True)
         return
     
     # Prepare roles list
@@ -200,7 +200,7 @@ async def setup_raid_req(
     role_mentions = ", ".join(role_mentions_list)
     
     await interaction.response.send_message(
-        f"✅ **Raid Request System Setup Complete!**\n\n"
+        f"**Raid Request System Setup Complete!**\n\n"
         f"**Settings:**\n"
         f"• Cooldown: {cooldown_minutes} minutes\n"
         f"• Allowed Channel: {channel.mention}\n"
@@ -217,7 +217,7 @@ async def raid_request(interaction: discord.Interaction, message: str):
     
     # Check if setup is complete
     if not is_setup_complete(guild_id):
-        await interaction.response.send_message("❌ The raid request system has not been set up yet. An administrator needs to run `/setupraidreq` first.", ephemeral=True)
+        await interaction.response.send_message("The raid request system has not been set up yet. An administrator needs to run `/setupraidreq` first.", ephemeral=True)
         return
     
     settings = guild_settings[guild_id]
@@ -226,7 +226,7 @@ async def raid_request(interaction: discord.Interaction, message: str):
     if interaction.channel.id not in settings['allowed_channels']:
         channel_mentions = [f"<#{ch_id}>" for ch_id in settings['allowed_channels']]
         await interaction.response.send_message(
-            f"❌ This command can only be used in: {', '.join(channel_mentions)}",
+            f"This command can only be used in: {', '.join(channel_mentions)}",
             ephemeral=True
         )
         return
@@ -235,7 +235,7 @@ async def raid_request(interaction: discord.Interaction, message: str):
     on_cooldown, end_time = is_on_cooldown(guild_id)
     if on_cooldown:
         await interaction.response.send_message(
-            f"⏰ This command is on cooldown. Try again <t:{end_time}:R>.",
+            f"This command is on cooldown. Try again <t:{end_time}:R>.",
             ephemeral=True
         )
         return
@@ -247,13 +247,13 @@ async def raid_request(interaction: discord.Interaction, message: str):
     word_count = len(sanitized_msg.split())
     if word_count > 20:
         await interaction.response.send_message(
-            f"❌ Your message is too long ({word_count} words). Please keep it to 20 words or less.",
+            f"Your message is too long ({word_count} words). Please keep it to 20 words or less.",
             ephemeral=True
         )
         return
     
     if not sanitized_msg.strip():
-        await interaction.response.send_message("❌ Your message cannot be empty after removing formatting and mentions.", ephemeral=True)
+        await interaction.response.send_message("Your message cannot be empty after removing formatting and mentions.", ephemeral=True)
         return
     
     # Set cooldown BEFORE posting (to prevent race conditions)
@@ -295,17 +295,17 @@ async def edit_cooldown(interaction: discord.Interaction, cooldown_minutes: int)
     
     # Check if user has admin permissions
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ You need administrator permissions to use this command.", ephemeral=True)
+        await interaction.response.send_message("You need administrator permissions to use this command.", ephemeral=True)
         return
     
     # Check if setup is complete
     if not is_setup_complete(guild_id):
-        await interaction.response.send_message("❌ Please run `/setupraidreq` first to set up the system.", ephemeral=True)
+        await interaction.response.send_message("Please run `/setupraidreq` first to set up the system.", ephemeral=True)
         return
     
     # Validate input
     if cooldown_minutes < 1:
-        await interaction.response.send_message("❌ Cooldown must be at least 1 minute.", ephemeral=True)
+        await interaction.response.send_message("Cooldown must be at least 1 minute.", ephemeral=True)
         return
     
     # Update settings
@@ -333,12 +333,12 @@ async def edit_channel(interaction: discord.Interaction, action: str, channel: d
     
     # Check if user has admin permissions
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ You need administrator permissions to use this command.", ephemeral=True)
+        await interaction.response.send_message("You need administrator permissions to use this command.", ephemeral=True)
         return
     
     # Check if setup is complete
     if not is_setup_complete(guild_id):
-        await interaction.response.send_message("❌ Please run `/setupraidreq` first to set up the system.", ephemeral=True)
+        await interaction.response.send_message("Please run `/setupraidreq` first to set up the system.", ephemeral=True)
         return
     
     settings = guild_settings[guild_id]
@@ -347,21 +347,21 @@ async def edit_channel(interaction: discord.Interaction, action: str, channel: d
         if channel.id not in settings['allowed_channels']:
             settings['allowed_channels'].append(channel.id)
             save_settings()
-            await interaction.response.send_message(f"✅ Added {channel.mention} to allowed channels.", ephemeral=True)
+            await interaction.response.send_message(f"Added {channel.mention} to allowed channels.", ephemeral=True)
         else:
-            await interaction.response.send_message(f"❌ {channel.mention} is already in the allowed channels list.", ephemeral=True)
+            await interaction.response.send_message(f"{channel.mention} is already in the allowed channels list.", ephemeral=True)
     
     elif action == "remove":
         if len(settings['allowed_channels']) <= 1:
-            await interaction.response.send_message("❌ Cannot remove the last allowed channel. At least one channel must be configured.", ephemeral=True)
+            await interaction.response.send_message("Cannot remove the last allowed channel. At least one channel must be configured.", ephemeral=True)
             return
         
         if channel.id in settings['allowed_channels']:
             settings['allowed_channels'].remove(channel.id)
             save_settings()
-            await interaction.response.send_message(f"✅ Removed {channel.mention} from allowed channels.", ephemeral=True)
+            await interaction.response.send_message(f"Removed {channel.mention} from allowed channels.", ephemeral=True)
         else:
-            await interaction.response.send_message(f"❌ {channel.mention} is not in the allowed channels list.", ephemeral=True)
+            await interaction.response.send_message(f"{channel.mention} is not in the allowed channels list.", ephemeral=True)
 
 @bot.tree.command(name="editpingedrole", description="Add or remove roles to ping")
 @app_commands.describe(
@@ -378,12 +378,12 @@ async def edit_pinged_role(interaction: discord.Interaction, action: str, role: 
     
     # Check if user has admin permissions
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ You need administrator permissions to use this command.", ephemeral=True)
+        await interaction.response.send_message("You need administrator permissions to use this command.", ephemeral=True)
         return
     
     # Check if setup is complete
     if not is_setup_complete(guild_id):
-        await interaction.response.send_message("❌ Please run `/setupraidreq` first to set up the system.", ephemeral=True)
+        await interaction.response.send_message("Please run `/setupraidreq` first to set up the system.", ephemeral=True)
         return
     
     settings = guild_settings[guild_id]
@@ -395,21 +395,21 @@ async def edit_pinged_role(interaction: discord.Interaction, action: str, role: 
         if role.id not in settings['pinged_roles']:
             settings['pinged_roles'].append(role.id)
             save_settings()
-            await interaction.response.send_message(f"✅ Added {role_display} to pinged roles.", ephemeral=True)
+            await interaction.response.send_message(f"Added {role_display} to pinged roles.", ephemeral=True)
         else:
-            await interaction.response.send_message(f"❌ {role_display} is already in the pinged roles list.", ephemeral=True)
+            await interaction.response.send_message(f"{role_display} is already in the pinged roles list.", ephemeral=True)
     
     elif action == "remove":
         if len(settings['pinged_roles']) <= 1:
-            await interaction.response.send_message("❌ Cannot remove the last pinged role. At least one role must be configured.", ephemeral=True)
+            await interaction.response.send_message("Cannot remove the last pinged role. At least one role must be configured.", ephemeral=True)
             return
         
         if role.id in settings['pinged_roles']:
             settings['pinged_roles'].remove(role.id)
             save_settings()
-            await interaction.response.send_message(f"✅ Removed {role_display} from pinged roles.", ephemeral=True)
+            await interaction.response.send_message(f"Removed {role_display} from pinged roles.", ephemeral=True)
         else:
-            await interaction.response.send_message(f"❌ {role_display} is not in the pinged roles list.", ephemeral=True)
+            await interaction.response.send_message(f"{role_display} is not in the pinged roles list.", ephemeral=True)
 
 @bot.tree.command(name="viewsettings", description="View current raid request settings")
 async def view_settings(interaction: discord.Interaction):
@@ -418,12 +418,12 @@ async def view_settings(interaction: discord.Interaction):
     
     # Check if user has admin permissions
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ You need administrator permissions to use this command.", ephemeral=True)
+        await interaction.response.send_message("You need administrator permissions to use this command.", ephemeral=True)
         return
     
     # Check if setup is complete
     if not is_setup_complete(guild_id):
-        await interaction.response.send_message("❌ The raid request system has not been set up yet. Run `/setupraidreq` first.", ephemeral=True)
+        await interaction.response.send_message("The raid request system has not been set up yet. Run `/setupraidreq` first.", ephemeral=True)
         return
     
     settings = guild_settings[guild_id]
@@ -491,7 +491,7 @@ if __name__ == "__main__":
     token = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN')
     
     if token == 'YOUR_BOT_TOKEN':
-        print("⚠️  Please set your BOT_TOKEN environment variable or replace 'YOUR_BOT_TOKEN' in the code!")
+        print("Please set your BOT_TOKEN environment variable or replace 'YOUR_BOT_TOKEN' in the code!")
         print("   You can create a .env file with: BOT_TOKEN=your_actual_bot_token")
         exit(1)
     
