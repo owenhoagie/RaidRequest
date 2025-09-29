@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import json
+import requests
 import asyncio
 import time
 import re
@@ -27,25 +28,47 @@ bot = commands.Bot(command_prefix='!', intents=intents, allowed_mentions=allowed
 guild_settings: Dict[int, Dict] = {}
 cooldown_data: Dict[int, Dict] = {}  # guild_id: {"end_time": timestamp}
 
-SETTINGS_FILE = "guild_settings.json"
+
+
+# Firebase config
+FIREBASE_URL = os.getenv("FIREBASE_URL")
+FIREBASE_SECRET = os.getenv("FIREBASE_SECRET")
+
+if not FIREBASE_URL:
+    print("Error: FIREBASE_URL environment variable is not set. Please set it in your .env file.")
+    exit(1)
+
+if not FIREBASE_SECRET:
+    print("Error: FIREBASE_SECRET environment variable is not set. Please set it in your .env file.")
+    exit(1)
+
 
 def load_settings():
-    """Load guild settings from JSON file"""
+    """Load guild settings from Firebase Realtime Database (legacy REST API)"""
     global guild_settings
     try:
-        with open(SETTINGS_FILE, 'r') as f:
-            guild_settings = json.load(f)
-            # Convert string keys back to int
-            guild_settings = {int(k): v for k, v in guild_settings.items()}
-    except FileNotFoundError:
+        url = f"{FIREBASE_URL}/guild_settings.json?auth={FIREBASE_SECRET}"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        if data:
+            guild_settings = {int(k): v for k, v in data.items()}
+        else:
+            guild_settings = {}
+    except Exception as e:
+        print(f"Error loading settings from Firebase: {e}")
         guild_settings = {}
 
+
 def save_settings():
-    """Save guild settings to JSON file"""
-    with open(SETTINGS_FILE, 'w') as f:
-        # Convert int keys to string for JSON compatibility
+    """Save guild settings to Firebase Realtime Database (legacy REST API)"""
+    try:
+        url = f"{FIREBASE_URL}/guild_settings.json?auth={FIREBASE_SECRET}"
         settings_to_save = {str(k): v for k, v in guild_settings.items()}
-        json.dump(settings_to_save, f, indent=2)
+        resp = requests.put(url, json=settings_to_save, timeout=10)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"Error saving settings to Firebase: {e}")
 
 def is_setup_complete(guild_id: int) -> bool:
     """Check if setup has been completed for a guild"""
