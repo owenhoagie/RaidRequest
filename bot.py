@@ -486,13 +486,30 @@ async def view_settings(interaction: discord.Interaction):
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
+
+# --- Flask web server for Render port binding ---
+import threading
+from flask import Flask
+
+def run_web():
+    app = Flask(__name__)
+
+    @app.route("/")
+    def home():
+        return "RaidRequest bot is running!"
+
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
 if __name__ == "__main__":
+    # Start Flask web server in a separate thread
+    web_thread = threading.Thread(target=run_web, daemon=True)
+    web_thread.start()
+
     # Get bot token from environment variable or use placeholder
     token = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN')
-    
     if token == 'YOUR_BOT_TOKEN':
         print("Please set your BOT_TOKEN environment variable or replace 'YOUR_BOT_TOKEN' in the code!")
         print("   You can create a .env file with: BOT_TOKEN=your_actual_bot_token")
         exit(1)
-    
     bot.run(token)
